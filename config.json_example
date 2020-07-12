@@ -1,0 +1,7 @@
+{
+    "database_file": "./zerto_stats2.db",
+    "zerto_analytics_username": "email@gmail.com",
+    "zerto_analytics_password": "secretPassword123",
+    "zerto_analytics_url": "https://analytics.api.zerto.com/v2/",
+    "poll_interval_minutes": 5
+}
