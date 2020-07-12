@@ -1,0 +1,8 @@
+version: "3"
+services:
+  zerto_stats2_poller:
+    build: ./
+    container_name: zerto_stats2_poller
+    ports:
+      - "8080:8080"
+    restart: always
