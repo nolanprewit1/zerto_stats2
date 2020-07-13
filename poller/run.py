@@ -1,6 +1,5 @@
 ### IMPORT REQUIRED PYTHON MODULES ###
-import json
-import requests
+import json, requests, time, datetime
 from sqlalchemy import Column, Integer, String, ForeignKey, create_engine, DateTime
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, backref, sessionmaker, joinedload
@@ -28,11 +27,12 @@ Base = declarative_base()
 class MonitoringAlerts(Base):
     __tablename__ = "monitoring_alerts"
     Id = Column(Integer, primary_key=True)
-    Identifier = Column(String, unique=True, nullable=False)
+    Identifier = Column(String, unique=False, nullable=False)
     Type = Column(String, unique=False, nullable=False)
     Description = Column(String, unique=False, nullable=False)
     SiteName = Column(String, unique=False, nullable=False)
     CollectionTime = Column(String, unique=False, nullable=False)
+    PollTime = Column(String, unique=False, nullable=False)
 
 ### CREATE DATABASE TABLES BASED ON MODELS ###
 Base.metadata.create_all(db_engine) 
@@ -48,22 +48,35 @@ def getAuthorizationToken ():
     return json.loads(response.content)["token"]
 
 ### GET MONITORING ALERTS ###
-def getMonitoringAlerts (api_token):
+def getMonitoringAlerts (api_token, poll_time):
     url = config.get("zerto_analytics_url") + "monitoring/alerts"
-    headers = {"Authorization": "Bearer " + api_token }
-    response = requests.get(url, headers=headers)
-    content = json.loads(response.content)
-    for item in content:
+    url_headers = {"Authorization": "Bearer " + api_token }
+    response = requests.get(url, headers=url_headers)
+    response_content = json.loads(response.content)
+    for item in response_content:
         data = MonitoringAlerts(
             Identifier = item["identifier"],
             Type = item["type"],
             Description = item["description"],
             SiteName = item["site"]["name"],
-            CollectionTime = item["collectionTime"]
+            CollectionTime = (item["collectionTime"]),
+            PollTime = poll_time
         )
         db_connection.add(data)
         
+    # Save all collected data to the database
     db_connection.commit()
 
-api_token = getAuthorizationToken()
-getMonitoringAlerts(api_token)
+poll_interval_seconds = config.get("poll_interval_minutes") * 60
+while True:
+    poll_time = datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3] + 'Z'
+    print("Poll time " + str(poll_time) + "...")
+
+    print("Getting apik token...")
+    api_token = getAuthorizationToken()
+
+    print("Getting data from Monitoring/Alerts...")
+    getMonitoringAlerts(api_token, poll_time)
+
+    print("Sleeping for " + str(config.get("poll_interval_minutes")) + " minute(s)...")
+    time.sleep(poll_interval_seconds)
