@@ -1,6 +1,7 @@
 ### IMPORT REQUIRED PYTHON MODULES ###
 import json, requests, time, datetime
 from sqlalchemy import Column, Integer, String, ForeignKey, create_engine, DateTime
+from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, backref, sessionmaker, joinedload
 from sqlalchemy.pool import StaticPool
@@ -54,15 +55,24 @@ def getMonitoringAlerts (api_token, poll_time):
     response = requests.get(url, headers=url_headers)
     response_content = json.loads(response.content)
     for item in response_content:
-        data = MonitoringAlerts(
-            Identifier = item["identifier"],
-            Type = item["type"],
-            Description = item["description"],
-            SiteName = item["site"]["name"],
-            CollectionTime = (item["collectionTime"]),
-            PollTime = poll_time
-        )
-        db_connection.add(data)
+        # Check for existing identifier
+        try:
+            results = db_connection\
+                .query(MonitoringAlerts)\
+                .filter(MonitoringAlerts.Identifier==item["identifier"])\
+                .one()
+            print(results)
+        except NoResultFound:
+            # If a new alert save to database
+            data = MonitoringAlerts(
+                Identifier = item["identifier"],
+                Type = item["type"],
+                Description = item["description"],
+                SiteName = item["site"]["name"],
+                CollectionTime = (item["collectionTime"]),
+                PollTime = poll_time
+            )
+            db_connection.add(data)
         
     # Save all collected data to the database
     db_connection.commit()
