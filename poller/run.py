@@ -1,5 +1,6 @@
 ### IMPORT REQUIRED PYTHON MODULES ###
-import json, requests, time, datetime
+import json, requests, time
+from datetime import datetime, timedelta
 from sqlalchemy import Column, Integer, String, ForeignKey, create_engine, DateTime
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.ext.declarative import declarative_base
@@ -64,7 +65,7 @@ def getMonitoringAlerts (api_token, poll_time):
         # If its a new alert save to database
         except NoResultFound:
             # Get the collectionTime, a string, and remove the last 5 characters then convert it ot a python datetime object 
-            collection_time = datetime.datetime.strptime(item["collectionTime"][:-5], '%Y-%m-%dT%H:%M:%S')
+            collection_time = datetime.strptime(item["collectionTime"][:-5], '%Y-%m-%dT%H:%M:%S')
             data = MonitoringAlerts(
                 Identifier = item["identifier"],
                 Type = item["type"],
@@ -78,9 +79,23 @@ def getMonitoringAlerts (api_token, poll_time):
     # Save all collected data to the database
     db_connection.commit()
 
+### PURGE OLD RECORDS ###
+def purgeOldRecords (purge_time, poll_time):
+    # Get records older than purge date
+    results = db_connection\
+        .query(MonitoringAlerts)\
+        .filter(MonitoringAlerts.CollectionTime < purge_time)
+
+    # For each record found delete it
+    for item in results:
+        db_connection.delete(item)
+
+    # Commit deleted records
+    db_connection.commit()
+    
 poll_interval_seconds = config.get("poll_interval_minutes") * 60
 while True:
-    poll_time = datetime.datetime.utcnow()
+    poll_time = datetime.utcnow()
     print("Poll time " + str(poll_time) + "...")
 
     print("Getting apik token...")
@@ -88,6 +103,10 @@ while True:
 
     print("Getting data from Monitoring/Alerts...")
     getMonitoringAlerts(api_token, poll_time)
+
+    purge_time = poll_time- timedelta(days=config.get("purge_records_days"))
+    print("Removing records older than " + str(purge_time) + "...")
+    purgeOldRecords(purge_time, poll_time)
 
     print("Sleeping for " + str(config.get("poll_interval_minutes")) + " minute(s)...")
     time.sleep(poll_interval_seconds)
