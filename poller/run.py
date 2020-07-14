@@ -32,8 +32,8 @@ class MonitoringAlerts(Base):
     Type = Column(String, unique=False, nullable=False)
     Description = Column(String, unique=False, nullable=False)
     SiteName = Column(String, unique=False, nullable=False)
-    CollectionTime = Column(String, unique=False, nullable=False)
-    PollTime = Column(String, unique=False, nullable=False)
+    CollectionTime = Column(DateTime, unique=False, nullable=False)
+    PollTime = Column(DateTime, unique=False, nullable=False)
 
 ### CREATE DATABASE TABLES BASED ON MODELS ###
 Base.metadata.create_all(db_engine) 
@@ -61,15 +61,16 @@ def getMonitoringAlerts (api_token, poll_time):
                 .query(MonitoringAlerts)\
                 .filter(MonitoringAlerts.Identifier==item["identifier"])\
                 .one()
-            print(results)
+        # If its a new alert save to database
         except NoResultFound:
-            # If a new alert save to database
+            # Get the collectionTime, a string, and remove the last 5 characters then convert it ot a python datetime object 
+            collection_time = datetime.datetime.strptime(item["collectionTime"][:-5], '%Y-%m-%dT%H:%M:%S')
             data = MonitoringAlerts(
                 Identifier = item["identifier"],
                 Type = item["type"],
                 Description = item["description"],
                 SiteName = item["site"]["name"],
-                CollectionTime = (item["collectionTime"]),
+                CollectionTime = collection_time,
                 PollTime = poll_time
             )
             db_connection.add(data)
@@ -79,7 +80,7 @@ def getMonitoringAlerts (api_token, poll_time):
 
 poll_interval_seconds = config.get("poll_interval_minutes") * 60
 while True:
-    poll_time = datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3] + 'Z'
+    poll_time = datetime.datetime.utcnow()
     print("Poll time " + str(poll_time) + "...")
 
     print("Getting apik token...")
