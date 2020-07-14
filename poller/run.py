@@ -124,10 +124,21 @@ def getMonitoringEvents (api_token, poll_time):
 
 ### PURGE OLD RECORDS ###
 def purgeOldRecords (purge_time, poll_time):
+    ### Monitoring Alerts ###
     # Get records older than purge date
     results = db_connection\
         .query(MonitoringAlerts)\
         .filter(MonitoringAlerts.CollectionTime < purge_time)
+
+    # For each record found delete it
+    for item in results:
+        db_connection.delete(item)
+
+    ### Monitoring Events ###
+    # Get records older than purge date
+    results = db_connection\
+        .query(MonitoringEvents)\
+        .filter(MonitoringEvents.CollectionTime < purge_time)
 
     # For each record found delete it
     for item in results:
@@ -151,7 +162,7 @@ while True:
     getMonitoringEvents(api_token, poll_time)
 
     purge_time = poll_time- timedelta(days=config.get("purge_records_days"))
-    print("Removing records older than " + str(purge_time) + "...")
+    print("Purging records older than " + str(purge_time) + "...")
     purgeOldRecords(purge_time, poll_time)
 
     print("Sleeping for " + str(config.get("poll_interval_minutes")) + " minute(s)...")
