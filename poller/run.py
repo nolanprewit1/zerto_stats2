@@ -91,7 +91,7 @@ def getMonitoringAlerts (api_token, poll_time):
     # Save all collected data to the database
     db_connection.commit()
 
-### GET MONITORING ALERTS ###
+### GET MONITORING EVENTS ###
 def getMonitoringEvents (api_token, poll_time):
     url = config.get("zerto_analytics_url") + "monitoring/events"
     url_headers = {"Authorization": "Bearer " + api_token }
@@ -123,22 +123,11 @@ def getMonitoringEvents (api_token, poll_time):
     db_connection.commit()
 
 ### PURGE OLD RECORDS ###
-def purgeOldRecords (purge_time, poll_time):
-    ### Monitoring Alerts ###
+def purgeOldRecords (purge_time, poll_time, class_name):
     # Get records older than purge date
     results = db_connection\
-        .query(MonitoringAlerts)\
-        .filter(MonitoringAlerts.CollectionTime < purge_time)
-
-    # For each record found delete it
-    for item in results:
-        db_connection.delete(item)
-
-    ### Monitoring Events ###
-    # Get records older than purge date
-    results = db_connection\
-        .query(MonitoringEvents)\
-        .filter(MonitoringEvents.CollectionTime < purge_time)
+        .query(class_name)\
+        .filter(class_name.PollTime < purge_time)
 
     # For each record found delete it
     for item in results:
@@ -150,6 +139,8 @@ def purgeOldRecords (purge_time, poll_time):
 poll_interval_seconds = config.get("poll_interval_minutes") * 60
 while True:
     poll_time = datetime.utcnow()
+    purge_time = poll_time - timedelta(days=config.get("purge_records_days"))
+
     print("Poll time " + str(poll_time) + "...")
 
     print("Getting apik token...")
@@ -158,12 +149,15 @@ while True:
     print("Getting data from Monitoring/Alerts...")
     getMonitoringAlerts(api_token, poll_time)
 
+    print("Purging records from Monitoring/Alerts older than " + str(purge_time) + "...")
+    purgeOldRecords (purge_time, poll_time, MonitoringAlerts)
+
     print("Getting data from Monitoring/Events...")
     getMonitoringEvents(api_token, poll_time)
 
-    purge_time = poll_time- timedelta(days=config.get("purge_records_days"))
-    print("Purging records older than " + str(purge_time) + "...")
-    purgeOldRecords(purge_time, poll_time)
+    print("Purging records from Monitoring/Events older than " + str(purge_time) + "...")
+    purgeOldRecords (purge_time, poll_time, MonitoringEvents)
+
 
     print("Sleeping for " + str(config.get("poll_interval_minutes")) + " minute(s)...")
     time.sleep(poll_interval_seconds)
