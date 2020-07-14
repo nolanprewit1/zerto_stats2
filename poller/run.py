@@ -157,7 +157,6 @@ while True:
 
     print("Purging records from Monitoring/Events older than " + str(purge_time) + "...")
     purgeOldRecords (purge_time, poll_time, MonitoringEvents)
-
-
+    
     print("Sleeping for " + str(config.get("poll_interval_minutes")) + " minute(s)...")
     time.sleep(poll_interval_seconds)
