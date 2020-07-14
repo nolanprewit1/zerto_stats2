@@ -1,5 +1,6 @@
 ### IMPORT REQUIRED PYTHON MODULES ###
 import json, requests, time
+import os
 from datetime import datetime, timedelta
 from sqlalchemy import Column, Integer, String, ForeignKey, create_engine, DateTime
 from sqlalchemy.orm.exc import NoResultFound
@@ -8,9 +9,9 @@ from sqlalchemy.orm import relationship, backref, sessionmaker, joinedload
 from sqlalchemy.pool import StaticPool
 
 ### IMPORT CONFIG FILE ### 
-with open("..\config.json") as config_file:
+config_path = os.path.join( os.getcwd(), '..', 'config.json' )
+with open(config_path) as config_file:
     config = json.load(config_file)
-
 ### CONNECT TO THE DATABASE ###
 try:
     db_path = "sqlite:///" + config.get("database_file")
