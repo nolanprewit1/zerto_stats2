@@ -26,6 +26,7 @@ except:
 
 ### CREATE CLASSES THAT MATCH DATABASE TABLES ###
 Base = declarative_base()
+
 class MonitoringAlerts(Base):
     __tablename__ = "monitoring_alerts"
     Id = Column(Integer, primary_key=True)
@@ -34,6 +35,17 @@ class MonitoringAlerts(Base):
     Description = Column(String, unique=False, nullable=False)
     SiteName = Column(String, unique=False, nullable=False)
     CollectionTime = Column(DateTime, unique=False, nullable=False)
+    PollTime = Column(DateTime, unique=False, nullable=False)
+
+class MonitoringEvents(Base):
+    __tablename__ = "monitoring_events"
+    Id = Column(Integer, primary_key=True)
+    Identifier = Column(String, unique=False, nullable=False)
+    Description = Column(String, unique=False, nullable=False)
+    Code = Column(String, unique=False, nullable=False)
+    OccurredOn = Column(DateTime, unique=False, nullable=False)
+    SiteName = Column(String, unique=False, nullable=False)
+    ZorgName = Column(String, unique=False, nullable=True)    
     PollTime = Column(DateTime, unique=False, nullable=False)
 
 ### CREATE DATABASE TABLES BASED ON MODELS ###
@@ -79,6 +91,37 @@ def getMonitoringAlerts (api_token, poll_time):
     # Save all collected data to the database
     db_connection.commit()
 
+### GET MONITORING ALERTS ###
+def getMonitoringEvents (api_token, poll_time):
+    url = config.get("zerto_analytics_url") + "monitoring/events"
+    url_headers = {"Authorization": "Bearer " + api_token }
+    response = requests.get(url, headers=url_headers)
+    response_content = json.loads(response.content)
+    for item in response_content["events"]:
+        # Check for existing identifier
+        try:
+            results = db_connection\
+                .query(MonitoringEvents)\
+                .filter(MonitoringEvents.Identifier==item["identifier"])\
+                .one()
+        # If its a new alert save to database
+        except NoResultFound:
+            # Get the collectionTime, a string, and remove the last 5 characters then convert it ot a python datetime object 
+            occured_on = datetime.strptime(item["occurredOn"][:-5], '%Y-%m-%dT%H:%M:%S')
+            data = MonitoringEvents(
+                Identifier = item["identifier"],
+                Description = item["description"],
+                Code = item["code"],
+                OccurredOn = occured_on,
+                SiteName = item["site"]["name"],
+                ZorgName = item["zorg"]["name"],
+                PollTime = poll_time
+            )
+            db_connection.add(data)
+        
+    # Save all collected data to the database
+    db_connection.commit()
+
 ### PURGE OLD RECORDS ###
 def purgeOldRecords (purge_time, poll_time):
     # Get records older than purge date
@@ -103,6 +146,9 @@ while True:
 
     print("Getting data from Monitoring/Alerts...")
     getMonitoringAlerts(api_token, poll_time)
+
+    print("Getting data from Monitoring/Events...")
+    getMonitoringEvents(api_token, poll_time)
 
     purge_time = poll_time- timedelta(days=config.get("purge_records_days"))
     print("Removing records older than " + str(purge_time) + "...")
