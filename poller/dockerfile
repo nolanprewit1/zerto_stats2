@@ -7,4 +7,4 @@ RUN pip install -r requirements.txt
 RUN pip install --upgrade pip
 WORKDIR /zerto_stats2/poller
 ENTRYPOINT ["python3"]
-CMD ["run.py"]
+CMD ["-u", "run.py"]

@@ -1,5 +1,5 @@
 ### IMPORT REQUIRED PYTHON MODULES ###
-import json, requests, time, os, sys
+import json, requests, time, os
 from datetime import datetime, timedelta
 from sqlalchemy import Column, Integer, String, ForeignKey, create_engine, DateTime
 from sqlalchemy.orm.exc import NoResultFound
@@ -141,23 +141,23 @@ while True:
     poll_time = datetime.utcnow()
     purge_time = poll_time - timedelta(days=config.get("purge_records_days"))
 
-    sys.stdout.write("Poll time " + str(poll_time) + "..." + "\n")
-    # print("Poll time " + str(poll_time) + "...")
+    print("Poll time " + str(poll_time) + "...")
 
-    sys.stdout.write("Getting apik token..." + "\n")  
+    print("Getting apik token...")
     api_token = getAuthorizationToken()
 
-    sys.stdout.write("Getting data from Monitoring/Alerts..." + "\n")  
+    print("Getting data from Monitoring/Alerts...")
     getMonitoringAlerts(api_token, poll_time)
 
-    sys.stdout.write("Purging records from Monitoring/Alerts older than " + str(purge_time) + "..." + "\n")  
+    print("Purging records from Monitoring/Alerts older than " + str(purge_time) + "...")
     purgeOldRecords (purge_time, poll_time, MonitoringAlerts)
 
-    sys.stdout.write("Getting data from Monitoring/Events..." + "\n")  
+    print("Getting data from Monitoring/Events...")
     getMonitoringEvents(api_token, poll_time)
 
-    sys.stdout.write("Purging records from Monitoring/Events older than " + str(purge_time) + "..." + "\n")  
+    print("Purging records from Monitoring/Events older than " + str(purge_time) + "...")
     purgeOldRecords (purge_time, poll_time, MonitoringEvents)
 
-    sys.stdout.write("Sleeping for " + str(config.get("poll_interval_minutes")) + " minute(s)..." + "\n")  
+
+    print("Sleeping for " + str(config.get("poll_interval_minutes")) + " minute(s)...")
     time.sleep(poll_interval_seconds)
