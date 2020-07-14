@@ -11,6 +11,7 @@ from sqlalchemy.pool import StaticPool
 config_path = os.path.join( os.getcwd(), '..', 'config.json' )
 with open(config_path) as config_file:
     config = json.load(config_file)
+
 ### CONNECT TO THE DATABASE ###
 try:
     db_path = "sqlite:///" + config.get("database_file")
@@ -157,6 +158,6 @@ while True:
 
     print("Purging records from Monitoring/Events older than " + str(purge_time) + "...")
     purgeOldRecords (purge_time, poll_time, MonitoringEvents)
-    
+
     print("Sleeping for " + str(config.get("poll_interval_minutes")) + " minute(s)...")
     time.sleep(poll_interval_seconds)
