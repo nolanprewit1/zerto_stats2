@@ -1,0 +1,21 @@
+{% extends 'layout/layout.html' %}
+{% block body %}
+{% for result in results %}
+  <h3>Update Employee Record</h3>
+  <form action="/employees/update/{{result.id}}" method="POST">
+    <label>First Name</label> <br>
+    <input type="text" name="firstName" value={{result.firstName}} required> <br>
+    <label>Last Names</label> <br>
+    <input type="text" name="lastName" value={{result.lastName}} required> <br>
+    <label>Position</label> <br>
+    <input type="text" name="position" value={{result.position}} required> <br> 
+    <br>     
+    <button type="submit">Update</button>
+  </form>  
+  <br>
+  <form action="/employees">
+    <button type="submit">Back</button>
+  </form>
+{% endfor %}
+
+{% endblock %}

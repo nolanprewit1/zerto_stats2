@@ -9,11 +9,6 @@ from sqlalchemy.orm import relationship, backref, sessionmaker, joinedload
 from sqlalchemy.pool import StaticPool
 
 ### IMPORT CONFIG FILE ### 
-# config_path = os.path.join( os.getcwd(), '..', 'config.json' )
-# with open(config_path) as config_file:
-#     config = json.load(config_file)
-# IMPORT ENV FILE
-# dotenv_path = join(dirname(__file__), '.env')
 load_dotenv(os.path.join( os.getcwd(), '..', '.env' ))
 
 ### CONNECT TO THE DATABASE ###

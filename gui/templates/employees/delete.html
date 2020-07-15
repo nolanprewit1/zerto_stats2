@@ -1,0 +1,20 @@
+{% extends 'layout/layout.html' %}
+{% block body %}
+{% for result in results %}
+  <h3>Delete Employee Record</h3>
+  <form action="/employees/delete/{{result.id}}" method="POST">
+    <label>First Name</label> <br>
+    <input type="text" name="firstName" value={{result.firstName}} readonly> <br>
+    <label>Last Names</label> <br>
+    <input type="text" name="lastName" value={{result.lastName}} readonly> <br>
+    <label>Position</label> <br>
+    <input type="text" name="position" value={{result.position}} readonly> <br> 
+    <br>     
+    <button type="submit">Delete</button>
+  </form>
+  <br>
+  <form action="/employees">
+    <button type="submit">Back</button>
+  </form>
+{% endfor %}
+{% endblock %}

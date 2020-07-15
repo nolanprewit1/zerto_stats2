@@ -1,0 +1,16 @@
+{% extends '/layout/layout.html' %}
+{% block body %}
+{% for result in results %}
+  <h3>Employee Record Detail</h3>    
+  <form action="/employees" method="GET">
+    <label>First Name</label> <br>
+    <input type="text" name="firstName" value={{result.firstName}} readonly> <br>
+    <label>Last Names</label> <br>
+    <input type="text" name="lastName" value={{result.lastName}} readonly> <br>
+    <label>Position</label> <br>
+    <input type="text" name="position" value={{result.position}} readonly> <br> 
+    <br>     
+    <button type="submit">Back</button>
+  </form>    
+{% endfor %}
+{% endblock %}

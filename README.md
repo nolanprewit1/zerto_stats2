@@ -24,10 +24,8 @@ How To Use This
 
 Stop and remove all docker containers, images, and volumes
 
-    `
     docker stop $(docker ps -a -q) && \
     docker rm $(docker ps -aq) && \
     docker system prune -a -f && \
     docker image prune -a -f && \
-    docker volume prune -f 
-    `
+    docker volume prune -f
