@@ -1,5 +1,6 @@
 ### IMPORT REQUIRED PYTHON MODULES ###
 import json, requests, time, os
+from dotenv import load_dotenv
 from datetime import datetime, timedelta
 from sqlalchemy import Column, Integer, String, ForeignKey, create_engine, DateTime
 from sqlalchemy.orm.exc import NoResultFound
@@ -8,13 +9,16 @@ from sqlalchemy.orm import relationship, backref, sessionmaker, joinedload
 from sqlalchemy.pool import StaticPool
 
 ### IMPORT CONFIG FILE ### 
-config_path = os.path.join( os.getcwd(), '..', 'config.json' )
-with open(config_path) as config_file:
-    config = json.load(config_file)
+# config_path = os.path.join( os.getcwd(), '..', 'config.json' )
+# with open(config_path) as config_file:
+#     config = json.load(config_file)
+# IMPORT ENV FILE
+# dotenv_path = join(dirname(__file__), '.env')
+load_dotenv(os.path.join( os.getcwd(), '..', '.env' ))
 
 ### CONNECT TO THE DATABASE ###
 try:
-    db_path = "sqlite:///" + config.get("database_file")
+    db_path = "sqlite:///" + os.getenv("database_file")
     db_engine = create_engine(
         db_path, 
         echo=False, 
@@ -54,17 +58,21 @@ Base.metadata.create_all(db_engine)
 
 ### FUNCTION TO AUTHENTICATE WITH ZERTO ANALYTICS API AND RETURN AUTHORIZATION TOKEN ###
 def getAuthorizationToken ():
-    url = config.get("zerto_analytics_url") + "auth/token"
+    url = os.getenv("zerto_analytics_url") + "auth/token"
     data = {
-        "username": config.get("zerto_analytics_username"),
-        "password": config.get("zerto_analytics_password")
+        "username": os.getenv("zerto_analytics_username"),
+        "password": os.getenv("zerto_analytics_password")
     }
     response = requests.post(url, json=data)
+    if(response.status_code != 200):
+        print("Issue authorizing against Zerto Analytics API...")
+        exit()
+        
     return json.loads(response.content)["token"]
 
 ### GET MONITORING ALERTS ###
 def getMonitoringAlerts (api_token, poll_time):
-    url = config.get("zerto_analytics_url") + "monitoring/alerts"
+    url = os.getenv("zerto_analytics_url") + "monitoring/alerts"
     url_headers = {"Authorization": "Bearer " + api_token }
     response = requests.get(url, headers=url_headers)
     response_content = json.loads(response.content)
@@ -94,7 +102,7 @@ def getMonitoringAlerts (api_token, poll_time):
 
 ### GET MONITORING EVENTS ###
 def getMonitoringEvents (api_token, poll_time):
-    url = config.get("zerto_analytics_url") + "monitoring/events"
+    url = os.getenv("zerto_analytics_url") + "monitoring/events"
     url_headers = {"Authorization": "Bearer " + api_token }
     response = requests.get(url, headers=url_headers)
     response_content = json.loads(response.content)
@@ -137,10 +145,10 @@ def purgeOldRecords (purge_time, poll_time, class_name):
     # Commit deleted records
     db_connection.commit()
     
-poll_interval_seconds = config.get("poll_interval_minutes") * 60
+poll_interval_seconds = int(os.getenv("poll_interval_minutes")) * 60
 while True:
     poll_time = datetime.utcnow()
-    purge_time = poll_time - timedelta(days=config.get("purge_records_days"))
+    purge_time = poll_time - timedelta(days=int(os.getenv("purge_records_days")))
 
     print("Poll time " + str(poll_time) + "...")
 
@@ -159,5 +167,5 @@ while True:
     print("Purging records from Monitoring/Events older than " + str(purge_time) + "...")
     purgeOldRecords (purge_time, poll_time, MonitoringEvents)
 
-    print("Sleeping for " + str(config.get("poll_interval_minutes")) + " minute(s)...")
+    print("Sleeping for " + str(os.getenv("poll_interval_minutes")) + " minute(s)...")
     time.sleep(poll_interval_seconds)
