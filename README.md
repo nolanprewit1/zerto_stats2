@@ -18,3 +18,10 @@ How To Use This
     Running in Docker container
         1. Run `git clone https://github.com/nolanprewit1/zerto_stats2.git` to download the source code to your desired server
         2. Run ` docker compose up -d --force-recreate --build ` to build and run the included docker-compose file. 
+
+Stop and remove all docker containers, images, and volumes
+    docker stop $(docker ps -a -q) && \
+    docker rm $(docker ps -aq) && \
+    docker system prune -a -f && \
+    docker image prune -a -f && \
+    docker volume prune -f 
