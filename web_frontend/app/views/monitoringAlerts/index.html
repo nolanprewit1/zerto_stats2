@@ -1,0 +1,26 @@
+{% extends 'layout/layout.html' %}
+{% block body %}
+  <table id="monitoring_alerts_table">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th> 
+        <th>Site Name</th>
+      </tr>
+    </thead>      
+    <tbody>
+      {% for result in results %}
+        <tr>
+          <td>{{result.Type}}</td>
+          <td>{{result.Description}}</td>
+          <td>{{result.SiteName}}</td>
+        </tr>
+      {% endfor %}
+    </tbody> 
+  </table>
+  <script>
+    $(document).ready( function () {
+      $('#monitoring_alerts_table').DataTable();
+    } );
+  </script>
+{% endblock %}
