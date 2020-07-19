@@ -34,10 +34,6 @@ declarative_base().metadata.create_all(db_engine)
 app = Flask(__name__, static_url_path='',template_folder='views', static_folder="static")
 app.debug = False
 
-### SET FLASK TEMPLATE FOLDER ###
-# app = Flask(__name__, template_folder='views')
-# app = Flask(__name__, static_url_path="", static_folder="static")
-
 ### ALLOW RELOAD OF TEMPLATE FILES DURING DEVELOPMENT ###
 def before_request():
     app.jinja_env.cache = {}
