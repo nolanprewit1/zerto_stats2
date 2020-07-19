@@ -4,7 +4,7 @@
         <!-- Required meta tags -->
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">        
-        <!-- Bootstrap CSS -->
+        <!-- Bootstrap -->
         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css" integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
         <!-- jQuery -->
         <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
@@ -14,13 +14,15 @@
         <title>Zerto Stats</title>        
     </head>
 
-    <nav>
-        <a href="/">Zerto Stats</a> | 
-        <a href="/monitoringAlerts">Alerts</a> |
-        <a href="/monitoringEvents">Events</a>
-    </nav>
-
     <body>
+        <!-- Nav Bar -->
+        <div class="d-flex flex-column flex-md-row align-items-center p-3 px-md-4 mb-3 bg-white border-bottom box-shadow">
+            <h5 class="my-0 mr-md-auto font-weight-normal"><a class="p-2 text-dark" href="/">Zerto Stats</a></h5>
+            <nav class="my-2 my-md-0 mr-md-3">
+                <a class="p-2 text-dark" href="/monitoringAlerts">Alerts</a>
+                <a class="p-2 text-dark" href="/monitoringEvents">Events</a>
+            </nav>
+        </div>
         {% block body %}
         {% endblock %}
     </body>
