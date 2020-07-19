@@ -31,7 +31,7 @@ from app.models.models_monitoring_events import MonitoringEvents
 declarative_base().metadata.create_all(db_engine) 
 
 ### DEFINE THE FLASK APP ###
-app = Flask(__name__, static_url_path='',template_folder='views', static_folder="static")
+app = Flask(__name__, static_url_path='',template_folder='views')
 app.debug = False
 
 ### ALLOW RELOAD OF TEMPLATE FILES DURING DEVELOPMENT ###
