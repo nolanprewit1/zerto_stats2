@@ -39,10 +39,6 @@ def before_request():
     app.jinja_env.cache = {}
 app.before_request(before_request)
 
-# READ
-@app.route('/')
-def index():
-    return redirect(url_for('monitoring_alerts_index'))
-
 ### IMPORT CONTROLLERS ###
+from app.controllers import index
 from app.controllers import monitoring_alerts
