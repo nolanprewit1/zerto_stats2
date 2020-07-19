@@ -1,6 +1,6 @@
 from app import app
 from app import db_connection
-from app.models import models_monitoring_alerts
+from app.models.models_monitoring_alerts import MonitoringAlerts
 from flask import render_template
 
 # READ
@@ -8,6 +8,6 @@ from flask import render_template
 def monitoring_alerts_index():
     # Get all records from the table
     results = db_connection\
-        .query(models_monitoring_alerts.MonitoringAlerts)\
+        .query(MonitoringAlerts)\
         .all()
     return render_template("monitoringAlerts/index.html", results=results)
