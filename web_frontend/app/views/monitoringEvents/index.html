@@ -4,17 +4,19 @@
   <table id="table">
     <thead>
       <tr>
-        <th>Type</th>
         <th>Description</th> 
+        <th>Code</th>
         <th>Site Name</th>
+        <th>Occured On</th>
       </tr>
     </thead>      
     <tbody>
       {% for result in results %}
         <tr>
-          <td>{{result.Type}}</td>
           <td>{{result.Description}}</td>
+          <td>{{result.Code}}</td>
           <td>{{result.SiteName}}</td>
+          <td>{{result.OccuredOn}}</td>
         </tr>
       {% endfor %}
     </tbody> 

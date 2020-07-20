@@ -13,23 +13,41 @@ load_dotenv(os.path.join( os.getcwd(), '..', '.env' ))
 
 ### CONNECT TO THE DATABASE ###
 try:
-    db_path = "sqlite:///" + os.getenv("database_file")
-    db_engine = create_engine(
-        db_path, 
-        echo=False, 
-        connect_args={"check_same_thread":False},
-        poolclass=StaticPool)
+    # def connect(user, password, db, host='localhost', port=5432):
+    url = "postgresql://{}:{}@{}:{}/{}"
+    url = url.format(os.getenv("database_username"), os.getenv("database_password"), os.getenv("database_hostname"), os.getenv("database_port"), os.getenv("database_name"))
+    db_engine = create_engine(url, client_encoding='utf8')
     Session = sessionmaker(bind=db_engine)
     db_connection = Session()
 except:
     print("There was an error connecting to the database...")
 
+Base = declarative_base()
+
 ### IMPORT DATABASE MODELS ###
-from models.models_monitoring_alerts import MonitoringAlerts
-from models.models_monitoring_events import MonitoringEvents
+class MonitoringAlerts(Base):
+    __tablename__ = "monitoring_alerts"
+    Id = Column(Integer, primary_key=True)
+    Identifier = Column(String, unique=False, nullable=False)
+    Type = Column(String, unique=False, nullable=False)
+    Description = Column(String, unique=False, nullable=False)
+    SiteName = Column(String, unique=False, nullable=False)
+    CollectionTime = Column(DateTime, unique=False, nullable=False)
+    PollTime = Column(DateTime, unique=False, nullable=False)
+
+class MonitoringEvents(Base):
+    __tablename__ = "monitoring_events"
+    Id = Column(Integer, primary_key=True)
+    Identifier = Column(String, unique=False, nullable=False)
+    Description = Column(String, unique=False, nullable=False)
+    Code = Column(String, unique=False, nullable=False)
+    OccurredOn = Column(DateTime, unique=False, nullable=False)
+    SiteName = Column(String, unique=False, nullable=False)
+    ZorgName = Column(String, unique=False, nullable=True)    
+    PollTime = Column(DateTime, unique=False, nullable=False)
 
 ### CREATE DATABASE TABLES BASED ON MODELS ###
-declarative_base().metadata.create_all(db_engine) 
+Base.metadata.create_all(db_engine) 
 
 ### FUNCTION TO AUTHENTICATE WITH ZERTO ANALYTICS API AND RETURN AUTHORIZATION TOKEN ###
 def getAuthorizationToken ():
