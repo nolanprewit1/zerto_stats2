@@ -24,32 +24,12 @@ try:
 except:
     print("There was an error connecting to the database...")
 
-### CREATE CLASSES THAT MATCH DATABASE TABLES ###
-Base = declarative_base()
-
-class MonitoringAlerts(Base):
-    __tablename__ = "monitoring_alerts"
-    Id = Column(Integer, primary_key=True)
-    Identifier = Column(String, unique=False, nullable=False)
-    Type = Column(String, unique=False, nullable=False)
-    Description = Column(String, unique=False, nullable=False)
-    SiteName = Column(String, unique=False, nullable=False)
-    CollectionTime = Column(DateTime, unique=False, nullable=False)
-    PollTime = Column(DateTime, unique=False, nullable=False)
-
-class MonitoringEvents(Base):
-    __tablename__ = "monitoring_events"
-    Id = Column(Integer, primary_key=True)
-    Identifier = Column(String, unique=False, nullable=False)
-    Description = Column(String, unique=False, nullable=False)
-    Code = Column(String, unique=False, nullable=False)
-    OccurredOn = Column(DateTime, unique=False, nullable=False)
-    SiteName = Column(String, unique=False, nullable=False)
-    ZorgName = Column(String, unique=False, nullable=True)    
-    PollTime = Column(DateTime, unique=False, nullable=False)
+### IMPORT DATABASE MODELS ###
+from models.models_monitoring_alerts import MonitoringAlerts
+from models.models_monitoring_events import MonitoringEvents
 
 ### CREATE DATABASE TABLES BASED ON MODELS ###
-Base.metadata.create_all(db_engine) 
+declarative_base().metadata.create_all(db_engine) 
 
 ### FUNCTION TO AUTHENTICATE WITH ZERTO ANALYTICS API AND RETURN AUTHORIZATION TOKEN ###
 def getAuthorizationToken ():
