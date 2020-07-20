@@ -12,12 +12,9 @@ load_dotenv(os.path.join( os.getcwd(), '..', '.env' ))
 
 ### CONNECT TO THE DATABASE ###
 try:
-    db_path = "sqlite:///" + os.getenv("database_file")
-    db_engine = create_engine(
-        db_path, 
-        echo=False, 
-        connect_args={"check_same_thread":False},
-        poolclass=StaticPool)
+    url = "postgresql://{}:{}@{}:{}/{}"
+    url = url.format(os.getenv("database_username"), os.getenv("database_password"), os.getenv("database_hostname"), os.getenv("database_port"), os.getenv("database_name"))
+    db_engine = create_engine(url, client_encoding='utf8')
     Session = sessionmaker(bind=db_engine)
     db_connection = Session()
 except:
@@ -26,9 +23,6 @@ except:
 ### IMPORT DATABASE MODELS ###
 from app.models.models_monitoring_alerts import MonitoringAlerts
 from app.models.models_monitoring_events import MonitoringEvents
-
-### CREATE DATABASE TABLES BASED ON MODELS ###
-declarative_base().metadata.create_all(db_engine) 
 
 ### DEFINE THE FLASK APP ###
 app = Flask(__name__, static_url_path='',template_folder='views', static_folder="static")

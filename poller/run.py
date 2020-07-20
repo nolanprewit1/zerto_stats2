@@ -13,7 +13,6 @@ load_dotenv(os.path.join( os.getcwd(), '..', '.env' ))
 
 ### CONNECT TO THE DATABASE ###
 try:
-    # def connect(user, password, db, host='localhost', port=5432):
     url = "postgresql://{}:{}@{}:{}/{}"
     url = url.format(os.getenv("database_username"), os.getenv("database_password"), os.getenv("database_hostname"), os.getenv("database_port"), os.getenv("database_name"))
     db_engine = create_engine(url, client_encoding='utf8')
